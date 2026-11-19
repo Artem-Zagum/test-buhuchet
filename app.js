@@ -30,8 +30,18 @@
       ],
       final: { id: 'm2final', title: 'Итоговый экзамен модуля', n: 40 },
     },
+    {
+      id: 'm3', n: 3, title: 'Бухгалтерский финансовый учёт (часть 1)',
+      topics: TESTS.filter(t => /^b\d+$/.test(t.id)).map(t => t.id),
+      checkpoints: [
+        { id: 'm3cp1', title: 'Контрольная точка 1', parts: ['b1', 'b2', 'b3'], n: 20 },
+        { id: 'm3cp2', title: 'Контрольная точка 2', parts: ['b4', 'b5', 'b6'], n: 20 },
+        { id: 'm3cp3', title: 'Контрольная точка 3', parts: ['b7', 'b8', 'b9'], n: 20 },
+      ],
+      final: { id: 'm3final', title: 'Итоговый экзамен модуля', n: 40 },
+    },
   ].filter(m => m.topics.length);
-  const SOON = ['Бухгалтерский финансовый учёт (часть 1)'];
+  const SOON = [];
   const ALL_CP = [].concat(...MODULES.map(m => m.checkpoints.concat([m.final])));
   const LEVELS = [
     [0, 'Стажёр'], [300, 'Помощник бухгалтера'], [800, 'Бухгалтер'], [1600, 'Экономист'],
@@ -209,7 +219,11 @@
     { id: 'm2all', ic: '🧾', name: 'Налоговед', d: 'Сдать на 70%+ все тесты модуля «Налоги»' },
     { id: 'm2cps', ic: '⚖️', name: 'Знаток НК', d: 'Сдать все контрольные точки модуля «Налоги»' },
     { id: 'm2final', ic: '🏛️', name: 'Экзамен по налогам', d: '80%+ на итоговом экзамене модуля «Налоги»' },
+    { id: 'm3all', ic: '📒', name: 'Бухгалтер-практик', d: 'Сдать на 70%+ все тесты модуля «Бухучёт»' },
+    { id: 'm3cps', ic: '🧮', name: 'Мастер проводок', d: 'Сдать все контрольные точки модуля «Бухучёт»' },
+    { id: 'm3final', ic: '📊', name: 'Экзамен по бухучёту', d: '80%+ на итоговом экзамене модуля «Бухучёт»' },
     { id: 'mods2', ic: '🧩', name: 'Два модуля', d: 'Сдать все тесты в двух модулях' },
+    { id: 'mods3', ic: '🎖️', name: 'Три модуля', d: 'Сдать все тесты в трёх модулях' },
     { id: 'fix20', ic: '🛠️', name: 'Работа над ошибками', d: 'Исправить 20 ошибок' },
     { id: 'fix100', ic: '🧰', name: 'Мастер исправлений', d: 'Исправить 100 ошибок' },
     { id: 'q100', ic: '💯', name: 'Сотня', d: 'Ответить на 100 вопросов' },
@@ -222,7 +236,7 @@
   function unlock(id, fresh) { if (!S.ach[id]) { S.ach[id] = today(); fresh.push(id); S.xp += 50; } }
   function checkAch(ctx) {
     const fresh = [];
-    const m1 = MODULES[0], m2 = modById('m2');
+    const m1 = MODULES[0], m2 = modById('m2'), m3 = modById('m3');
     const closed = MODULES.filter(m => m.topics.length && m.topics.every(passed));
     if (ctx.kind === 'test' || ctx.kind === 'cp' || ctx.kind === 'final') unlock('first', fresh);
     const nr = Object.keys(S.read).length;
@@ -240,6 +254,7 @@
     if (np >= 6) unlock('half', fresh);
     if (closed.length) unlock('all', fresh);
     if (closed.length >= 2) unlock('mods2', fresh);
+    if (closed.length >= 3) unlock('mods3', fresh);
     if (MODULES.some(m => m.topics.every(starred))) unlock('allstar', fresh);
     m1.checkpoints.forEach(cp => { if (cpPassed(cp)) unlock(cp.id, fresh); });
     if (MODULES.some(m => S.cps[m.final.id] && S.cps[m.final.id].best >= 0.8)) unlock('final', fresh);
@@ -247,6 +262,11 @@
       if (m2.topics.every(passed)) unlock('m2all', fresh);
       if (m2.checkpoints.every(cpPassed)) unlock('m2cps', fresh);
       if (S.cps.m2final && S.cps.m2final.best >= 0.8) unlock('m2final', fresh);
+    }
+    if (m3) {
+      if (m3.topics.every(passed)) unlock('m3all', fresh);
+      if (m3.checkpoints.every(cpPassed)) unlock('m3cps', fresh);
+      if (S.cps.m3final && S.cps.m3final.best >= 0.8) unlock('m3final', fresh);
     }
     if (S.fixed >= 20) unlock('fix20', fresh);
     if (S.fixed >= 100) unlock('fix100', fresh);
