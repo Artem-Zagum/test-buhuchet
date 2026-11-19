@@ -1,0 +1,89 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Экономика предприятия</title>
+<script src="https://telegram.org/js/telegram-web-app.js"></script>
+<style>
+:root{
+  --bg:#f4f5f8; --card:#ffffff; --text:#1b1f2a; --muted:#6b7385; --line:#e3e6ee;
+  --accent:#2f5bea; --accent-2:#e8eefe; --ok:#1f9d55; --ok-bg:#e5f6ec; --bad:#d64545; --bad-bg:#fdeaea;
+  --gold:#d79b00; --gold-bg:#fff4d6; --shadow:0 1px 2px rgba(20,30,60,.06),0 4px 14px rgba(20,30,60,.05);
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#11141b; --card:#1a1e28; --text:#e8ebf2; --muted:#98a0b3; --line:#2a3040;
+    --accent:#6b8cff; --accent-2:#222b45; --ok:#3ccf7d; --ok-bg:#163326; --bad:#ff6b6b; --bad-bg:#3a1c1f;
+    --gold:#ffc53d; --gold-bg:#3a2f12; --shadow:none;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#11141b; --card:#1a1e28; --text:#e8ebf2; --muted:#98a0b3; --line:#2a3040;
+  --accent:#6b8cff; --accent-2:#222b45; --ok:#3ccf7d; --ok-bg:#163326; --bad:#ff6b6b; --bad-bg:#3a1c1f;
+  --gold:#ffc53d; --gold-bg:#3a2f12; --shadow:none;
+}
+*{box-sizing:border-box}
+html,body{margin:0;background:var(--bg);color:var(--text);font:16px/1.45 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Arial,sans-serif;-webkit-tap-highlight-color:transparent}
+#app{max-width:640px;margin:0 auto;padding:16px 16px 96px}
+h1{font-size:22px;margin:4px 0 2px}
+h2{font-size:18px;margin:22px 0 10px}
+.muted{color:var(--muted)}
+.small{font-size:13px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:14px;box-shadow:var(--shadow)}
+.row{display:flex;gap:10px;align-items:center}
+.grow{flex:1;min-width:0}
+.btn{appearance:none;border:0;border-radius:12px;padding:13px 16px;font:600 16px/1.2 inherit;background:var(--accent);color:#fff;cursor:pointer;width:100%}
+.btn.sec{background:var(--accent-2);color:var(--accent)}
+.btn.ghost{background:transparent;color:var(--muted);font-weight:500}
+.btn:disabled{opacity:.45;cursor:default}
+.bar{height:8px;background:var(--line);border-radius:99px;overflow:hidden}
+.bar>i{display:block;height:100%;background:var(--accent);border-radius:99px;transition:width .3s}
+.pill{display:inline-block;font-size:12px;font-weight:600;padding:3px 8px;border-radius:99px;background:var(--accent-2);color:var(--accent)}
+.pill.ok{background:var(--ok-bg);color:var(--ok)} .pill.gold{background:var(--gold-bg);color:var(--gold)} .pill.bad{background:var(--bad-bg);color:var(--bad)}
+.hero{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:12px}
+.hero .card{padding:10px;text-align:center}
+.hero b{display:block;font-size:20px}
+.list{display:flex;flex-direction:column;gap:10px}
+.item{display:flex;gap:12px;align-items:center;cursor:pointer}
+.badge{width:42px;height:42px;border-radius:12px;display:grid;place-items:center;font-weight:700;background:var(--accent-2);color:var(--accent);flex:none}
+.badge.done{background:var(--ok-bg);color:var(--ok)} .badge.star{background:var(--gold-bg);color:var(--gold)} .badge.lock{background:var(--line);color:var(--muted)}
+.cp{border:2px dashed var(--line);background:transparent;box-shadow:none}
+.cp.open{border-color:var(--gold)}
+.q{font-size:17px;font-weight:600;margin:6px 0 14px}
+.opt{display:block;width:100%;text-align:left;border:1.5px solid var(--line);background:var(--card);color:var(--text);border-radius:12px;padding:12px 14px;margin:0 0 10px;font:inherit;cursor:pointer}
+.opt:active{transform:scale(.995)}
+.opt.ok{border-color:var(--ok);background:var(--ok-bg)}
+.opt.bad{border-color:var(--bad);background:var(--bad-bg)}
+.opt[disabled]{cursor:default}
+.explain{border-left:4px solid var(--accent);padding:10px 12px;background:var(--accent-2);border-radius:8px;margin:6px 0 14px;font-size:15px}
+.explain.ok{border-color:var(--ok)} .explain.bad{border-color:var(--bad)}
+.ach{display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:10px}
+.ach .card{text-align:center;padding:12px 8px}
+.ach .ic{font-size:30px;line-height:1}
+.ach .off{opacity:.38;filter:grayscale(1)}
+.nav{position:fixed;left:0;right:0;bottom:0;background:var(--card);border-top:1px solid var(--line);display:flex;justify-content:center;padding:6px 6px calc(6px + env(safe-area-inset-bottom))}
+.nav button{flex:1;max-width:160px;background:none;border:0;color:var(--muted);font:600 12px inherit;padding:6px 0;cursor:pointer}
+.nav button span{display:block;font-size:20px}
+.nav button.on{color:var(--accent)}
+.toast{position:fixed;left:50%;top:14px;transform:translateX(-50%);background:var(--gold-bg);color:var(--text);border:1px solid var(--gold);padding:10px 14px;border-radius:12px;z-index:9;box-shadow:var(--shadow);max-width:92vw;font-size:14px;animation:tin .3s}
+@keyframes tin{from{opacity:0;transform:translate(-50%,-8px)}}
+.big{font-size:46px;font-weight:800;text-align:center;margin:8px 0}
+.seg{display:flex;gap:6px;flex-wrap:wrap;margin:8px 0}
+.dot{width:14px;height:14px;border-radius:4px;background:var(--line)}
+.dot.ok{background:var(--ok)} .dot.bad{background:var(--bad)}
+table{width:100%;border-collapse:collapse;font-size:14px}
+td,th{padding:7px 4px;border-bottom:1px solid var(--line);text-align:left}
+th{color:var(--muted);font-weight:600}
+.src{font-size:12px;color:var(--muted);margin-top:6px}
+.top{display:flex;justify-content:space-between;align-items:center;gap:8px}
+.link{background:none;border:0;color:var(--accent);font:600 15px inherit;cursor:pointer;padding:6px 0}
+</style>
+</head>
+<body>
+<div id="app"></div>
+<nav class="nav" id="nav"></nav>
+<script src="tests.js"></script>
+<script src="app.js"></script>
+</body>
+</html>
