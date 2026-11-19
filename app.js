@@ -20,8 +20,18 @@
       ],
       final: { id: 'final', title: 'Итоговый экзамен модуля', n: 40 },
     },
-  ];
-  const SOON = ['Бухгалтерский учёт', 'Налогообложение', 'Основы аудита'];
+    {
+      id: 'm2', n: 2, title: 'Налоги и налогообложение (часть 1)',
+      topics: TESTS.filter(t => /^n\d+$/.test(t.id)).map(t => t.id),
+      checkpoints: [
+        { id: 'm2cp1', title: 'Контрольная точка 1', parts: ['n1', 'n2', 'n3'], n: 20 },
+        { id: 'm2cp2', title: 'Контрольная точка 2', parts: ['n4', 'n5', 'n6'], n: 20 },
+        { id: 'm2cp3', title: 'Контрольная точка 3', parts: ['n7', 'n8', 'n9'], n: 20 },
+      ],
+      final: { id: 'm2final', title: 'Итоговый экзамен модуля', n: 40 },
+    },
+  ].filter(m => m.topics.length);
+  const SOON = ['Бухгалтерский финансовый учёт (часть 1)'];
   const ALL_CP = [].concat(...MODULES.map(m => m.checkpoints.concat([m.final])));
   const LEVELS = [
     [0, 'Стажёр'], [300, 'Помощник бухгалтера'], [800, 'Бухгалтер'], [1600, 'Экономист'],
@@ -189,13 +199,17 @@
     { id: 'streak3', ic: '📅', name: 'Три дня подряд', d: 'Заниматься 3 дня подряд' },
     { id: 'streak7', ic: '🗓️', name: 'Неделя дисциплины', d: 'Заниматься 7 дней подряд' },
     { id: 'half', ic: '🌗', name: 'Экватор', d: 'Сдать на 70%+ шесть тестов' },
-    { id: 'all', ic: '🎓', name: 'Модуль закрыт', d: 'Сдать на 70%+ все тесты модуля' },
-    { id: 'allstar', ic: '🌟', name: 'Отличник', d: '90%+ во всех тестах модуля' },
-    { id: 'cp1', ic: '🧭', name: 'КТ-1 пройдена', d: 'Сдать контрольную точку 1' },
-    { id: 'cp2', ic: '🗺️', name: 'КТ-2 пройдена', d: 'Сдать контрольную точку 2' },
-    { id: 'cp3', ic: '⛰️', name: 'КТ-3 пройдена', d: 'Сдать контрольную точку 3' },
-    { id: 'cp4', ic: '🏔️', name: 'КТ-4 пройдена', d: 'Сдать контрольную точку 4' },
-    { id: 'final', ic: '🏆', name: 'Экзамен сдан', d: '80%+ на итоговом экзамене модуля' },
+    { id: 'all', ic: '🎓', name: 'Модуль закрыт', d: 'Сдать на 70%+ все тесты любого модуля' },
+    { id: 'allstar', ic: '🌟', name: 'Отличник', d: '90%+ во всех тестах любого модуля' },
+    { id: 'cp1', ic: '🧭', name: 'КТ-1 пройдена', d: 'Сдать контрольную точку 1 модуля 1' },
+    { id: 'cp2', ic: '🗺️', name: 'КТ-2 пройдена', d: 'Сдать контрольную точку 2 модуля 1' },
+    { id: 'cp3', ic: '⛰️', name: 'КТ-3 пройдена', d: 'Сдать контрольную точку 3 модуля 1' },
+    { id: 'cp4', ic: '🏔️', name: 'КТ-4 пройдена', d: 'Сдать контрольную точку 4 модуля 1' },
+    { id: 'final', ic: '🏆', name: 'Экзамен сдан', d: '80%+ на итоговом экзамене любого модуля' },
+    { id: 'm2all', ic: '🧾', name: 'Налоговед', d: 'Сдать на 70%+ все тесты модуля «Налоги»' },
+    { id: 'm2cps', ic: '⚖️', name: 'Знаток НК', d: 'Сдать все контрольные точки модуля «Налоги»' },
+    { id: 'm2final', ic: '🏛️', name: 'Экзамен по налогам', d: '80%+ на итоговом экзамене модуля «Налоги»' },
+    { id: 'mods2', ic: '🧩', name: 'Два модуля', d: 'Сдать все тесты в двух модулях' },
     { id: 'fix20', ic: '🛠️', name: 'Работа над ошибками', d: 'Исправить 20 ошибок' },
     { id: 'fix100', ic: '🧰', name: 'Мастер исправлений', d: 'Исправить 100 ошибок' },
     { id: 'q100', ic: '💯', name: 'Сотня', d: 'Ответить на 100 вопросов' },
@@ -208,12 +222,13 @@
   function unlock(id, fresh) { if (!S.ach[id]) { S.ach[id] = today(); fresh.push(id); S.xp += 50; } }
   function checkAch(ctx) {
     const fresh = [];
-    const m1 = MODULES[0], ids = m1.topics;
+    const m1 = MODULES[0], m2 = modById('m2');
+    const closed = MODULES.filter(m => m.topics.length && m.topics.every(passed));
     if (ctx.kind === 'test' || ctx.kind === 'cp' || ctx.kind === 'final') unlock('first', fresh);
     const nr = Object.keys(S.read).length;
     if (nr >= 1) unlock('read1', fresh);
     if (nr >= 6) unlock('read6', fresh);
-    if (ids.every(id => S.read[id])) unlock('readall', fresh);
+    if (MODULES.some(m => m.topics.every(id => S.read[id]))) unlock('readall', fresh);
     if (TESTS.some(t => passed(t.id))) unlock('pass1', fresh);
     const perf = TESTS.filter(t => S.tests[t.id] && S.tests[t.id].best >= 1).length;
     if (perf >= 1) unlock('perfect', fresh);
@@ -223,10 +238,16 @@
     const st = streak(); if (st >= 3) unlock('streak3', fresh); if (st >= 7) unlock('streak7', fresh);
     const np = TESTS.filter(t => passed(t.id)).length;
     if (np >= 6) unlock('half', fresh);
-    if (ids.length && ids.every(passed)) unlock('all', fresh);
-    if (ids.length && ids.every(starred)) unlock('allstar', fresh);
+    if (closed.length) unlock('all', fresh);
+    if (closed.length >= 2) unlock('mods2', fresh);
+    if (MODULES.some(m => m.topics.every(starred))) unlock('allstar', fresh);
     m1.checkpoints.forEach(cp => { if (cpPassed(cp)) unlock(cp.id, fresh); });
-    if (S.cps.final && S.cps.final.best >= 0.8) unlock('final', fresh);
+    if (MODULES.some(m => S.cps[m.final.id] && S.cps[m.final.id].best >= 0.8)) unlock('final', fresh);
+    if (m2) {
+      if (m2.topics.every(passed)) unlock('m2all', fresh);
+      if (m2.checkpoints.every(cpPassed)) unlock('m2cps', fresh);
+      if (S.cps.m2final && S.cps.m2final.best >= 0.8) unlock('m2final', fresh);
+    }
     if (S.fixed >= 20) unlock('fix20', fresh);
     if (S.fixed >= 100) unlock('fix100', fresh);
     if (S.answered >= 100) unlock('q100', fresh);
@@ -469,7 +490,7 @@
   /* ---------- прогресс ---------- */
   function progressView() {
     const lv = level(S.xp), st = streak();
-    const m1 = MODULES[0], ms = modStats(m1);
+    const ms = MODULES.map(modStats).reduce((a, b) => ({ read: a.read + b.read, pass: a.pass + b.pass, n: a.n + b.n }), { read: 0, pass: 0, n: 0 });
     let h = `<h1>Прогресс</h1>
       <div class="card mod" style="margin-top:14px"><div class="top"><div><div class="small muted" style="font-weight:700;text-transform:uppercase;letter-spacing:.05em">Уровень ${lv.n}</div><b style="font:700 20px Unbounded,Manrope,sans-serif">${lv.name}</b>
       <div class="small muted">${S.xp} XP${lv.next ? ' · до следующего ' + (lv.next - S.xp) : ' · максимум'}</div></div><span class="pill plain" style="background:rgba(255,255,255,.18);color:#fff">🔥 ${st} ${plural(st, 'день', 'дня', 'дней')}</span></div>
